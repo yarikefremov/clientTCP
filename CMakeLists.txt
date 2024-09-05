@@ -10,8 +10,11 @@ FetchContent_Declare(SFML
     GIT_TAG 2.6.x)
 FetchContent_MakeAvailable(SFML)
 
-add_executable(main src/main.cpp)
-target_link_libraries(main PRIVATE sfml-graphics)
+add_executable(main src/main.cpp
+    include/packets.h
+    include/netcommon.h include/netcommon.cpp
+)
+target_link_libraries(main PRIVATE sfml-graphics wsock32 ws2_32 fwpuclnt ntdsapi)
 target_compile_features(main PRIVATE cxx_std_17)
 
 if(WIN32)
@@ -21,3 +24,33 @@ if(WIN32)
         PRE_BUILD COMMAND ${CMAKE_COMMAND} -E copy ${SFML_SOURCE_DIR}/extlibs/bin/$<IF:$<EQUAL:${CMAKE_SIZEOF_VOID_P},8>,x64,x86>/openal32.dll $<TARGET_FILE_DIR:main>
         VERBATIM)
 endif()
+
+#UDP - SOCK_DGRAM
+#TCP - SOCK_STREAM
+#??? - SOCK_RAW
+#binding - giving a name (address) to socket
+#bind() - set socket address, getsockname - get socket address
+#AF_ - address family
+    #AF_LOCAL, AF_UNIX, AF_FILE - synonims, local namespace
+    #AF_INET - IPv4
+    #AF_INET6 - IPv6
+    #AF_UNSPEC -
+#PF_ - protocol family
+#It`s for LINUX...
+
+
+#Server
+#Initialize Winsock.
+#Create a socket.
+#Bind the socket.
+#Listen on the socket for a client.
+#Accept a connection from a client.
+#Receive and send data.
+#Disconnect.
+#
+#Client
+#Initialize Winsock.
+#Create a socket.
+#Connect to the server.
+#Send and receive data.
+#Disconnect.
