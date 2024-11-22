@@ -11,12 +11,20 @@ FetchContent_Declare(SFML
 FetchContent_MakeAvailable(SFML)
 
 add_executable(main src/main.cpp
-    include/packets.h
-    include/netcommon.h include/netcommon.cpp
+
+    include/tcpclient.h
+    src/tcpclient.cpp
+    resources/Anonymous_Pro.ttf
+    include/gui.h
+    src/gui.cpp
+    src/inetgui.cpp
+    include/inetgui.h
+    include/pckg.h
 )
 target_link_libraries(main PRIVATE sfml-graphics wsock32 ws2_32 fwpuclnt ntdsapi)
 target_compile_features(main PRIVATE cxx_std_17)
 
+#TODO: make that ttf file can be appload there
 if(WIN32)
     add_custom_command(
         TARGET main
@@ -54,3 +62,6 @@ endif()
 #Connect to the server.
 #Send and receive data.
 #Disconnect.
+
+#33 символа - длина пароля
+#33 символа - длина имени

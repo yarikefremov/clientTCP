@@ -4,3 +4,5 @@ out
 .idea
 .vs
 .vscode
+backup 1.txt
+src/main.cppb
