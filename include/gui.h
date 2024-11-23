@@ -14,6 +14,7 @@ private:
     bool isRegisterMode = false;
     bool isChatMode = false;
     bool isAddingUsername = false;
+    NetworkGUIInterface inetgui;
     sf::String nameInput, passwordInput, currentMessage;
     std::vector<sf::Text> chatLog;
     std::vector<std::string> users{"123", "key77", "gregor12", "michael1907"};
