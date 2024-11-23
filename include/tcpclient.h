@@ -5,6 +5,7 @@
 #include <thread>
 #include <WS2tcpip.h>
 #include "pckg.h"
+#include "inetgui.h"
 
 class TCPClient;
 
@@ -14,7 +15,7 @@ class TCPClient
 {
 public:
 
-    TCPClient();
+    TCPClient(NetworkGUIInterface* inetgui);
     ~TCPClient();
     bool initWinsock();
     bool connectSock();
@@ -27,6 +28,7 @@ public:
     std::string password;
 
 private:
+    NetworkGUIInterface* inetgui;
     void createSocket();
     std::string serverIP = "127.0.0.1";
     int serverPort = 54010;
