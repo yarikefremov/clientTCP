@@ -1,6 +1,7 @@
 #ifndef GUI_H
 #define GUI_H
 #include <SFML/Graphics.hpp>
+#include "inetgui.h"
 
 class GUI{
 public:
