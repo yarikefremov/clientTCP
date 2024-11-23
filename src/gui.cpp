@@ -1,7 +1,7 @@
 #include "../include/gui.h"
 
-GUI::GUI(){
-
+GUI::GUI(NetworkGUIInterface inetgui){
+    this->inetgui = inetgui;
 }
 
 void GUI::init(){
@@ -61,7 +61,7 @@ void GUI::loop(){
             if (event.type == sf::Event::TextEntered)        inputTextEventHandler();
             if (event.type == sf::Event::KeyPressed) keyEventHandler();
         }
-
+        //inetgui.getInputMsg();
         draw();
     }
 }
@@ -82,6 +82,8 @@ void GUI::mouseEventHandler(){
     }
 
     if (okButton.getGlobalBounds().contains(mousePos)) {
+        //inetgui.setAuth();
+        //inetgui.getAccept();
         isChatMode = true; // Переходим в режим чата
     }
 
@@ -148,6 +150,7 @@ void GUI::keyEventHandler(){
                 isAddingUsername = 0;
                 return redrawUsers();
             }
+            //inetgui.setOutputMsg();
             sf::Text newChatLine(nameInput+": "+currentMessage, font, 20);
             newChatLine.setFillColor(sf::Color(0x1B1B1BFF));
             newChatLine.setPosition(20.f, 20.f + chatLog.size() * 25.f); // Располагаем сообщения друг под другом
