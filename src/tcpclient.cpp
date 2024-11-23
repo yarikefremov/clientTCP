@@ -20,8 +20,9 @@ using namespace std;
 
 
 //When we create the client, we do not want the thread to run & try to receive data from the server until
-TCPClient::TCPClient()
+TCPClient::TCPClient(NetworkGUIInterface* inetgui)
 {
+    this->inetgui = inetgui;
     if (initWinsock()) {
         createSocket();
         connectSock();
@@ -73,7 +74,8 @@ void TCPClient::threadRecv(){
 
     recvThreadRunning = true;
     while (recvThreadRunning) {
-
+        
+        //inetgui all 4 funcs in this loop
         ZeroMemory(buf, sizeof(buf));
 
         int bytesReceived = recv(serverSocket, buf, sizeof(buf), 0);
