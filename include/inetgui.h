@@ -14,15 +14,15 @@ public:
     NetworkGUIInterface();
     
     //server -> net -> gui
-    msgpckg* getInputMsg();
-    void  setInputMsg();
-    acceptpckg* getAccept();
-    void setAccept();
+    bool getInputMsg(msgpckg& dst);
+    bool setInputMsg(msgpckg& data);
+    bool getAccept(acceptpckg& dst);
+    bool setAccept(acceptpckg& data);
 
     //gui -> net -> server
-    void sendAuth();
-    authpckg* getAuth();
-    void sendMsg();
-    msgpckg* getOutputMsg();
+    bool setAuth(authpckg& data);
+    bool getAuth(authpckg& dst);
+    bool setOutputMsg(msgpckg& data);
+    bool getOutputMsg(msgpckg& dst);
 };
 #endif
