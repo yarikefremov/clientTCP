@@ -12,14 +12,17 @@ private:
     bool flags[4]{0, 0, 0, 0};
 public:
     NetworkGUIInterface();
+    
     //server -> net -> gui
-    msgpckg* getInputMsg() { return &received_msg;}
+    msgpckg* getInputMsg();
     void  setInputMsg();
-    acceptpckg* getAccept(){ return &accepted_req;}
+    acceptpckg* getAccept();
     void setAccept();
 
     //gui -> net -> server
     void sendAuth();
+    authpckg* getAuth();
     void sendMsg();
+    msgpckg* getOutputMsg();
 };
 #endif
