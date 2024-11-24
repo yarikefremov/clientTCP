@@ -11,7 +11,7 @@ class TCPClient
 {
 public:
 
-    TCPClient(NetworkGUIInterface* inetgui);
+    TCPClient(NetworkGUIInterface* inetgui, std::string ipAddress);
     ~TCPClient();
     bool initWinsock();
     bool connectSock();

@@ -20,7 +20,7 @@
 using namespace std;
 
 //When we create the client, we do not want the thread to run & try to receive data from the server until
-TCPClient::TCPClient(NetworkGUIInterface* inetgui)
+TCPClient::TCPClient(NetworkGUIInterface* inetgui, std::string ipAddress) : serverIP(ipAddress)
 {
     this->inetgui = inetgui;
     if (initWinsock()) {
@@ -69,10 +69,12 @@ void TCPClient::threadRecv(){
         //inetgui all 4 funcs in this loop
         ZeroMemory(buf, sizeof(buf));
 
+        if(inetgui->flags[2])
         if(inetgui->getAuth(regpckg)){
             auth();
         }
 
+        if(inetgui->flags[1])
         if(inetgui->getOutputMsg(msg)){
             send(serverSocket, (const char*)(&msg), sizeof(msgpckg), 0);
         }
@@ -81,7 +83,7 @@ void TCPClient::threadRecv(){
         if (bytesReceived > 0) { //If client disconnects, bytesReceived = 0; if error, bytesReceived = -1;
             if(buf[0] == 1u){
                 memcpy(&msg, buf, sizeof(msgpckg));
-                while(inetgui->setInputMsg(msg)) std::this_thread::sleep_for(std::chrono::milliseconds(50));
+                while(!inetgui->setInputMsg(msg)) std::this_thread::sleep_for(std::chrono::milliseconds(50));
             }
         }
 
@@ -98,7 +100,7 @@ bool TCPClient::connectSock() {
         WSACleanup();
         return 0;
     }
-    DWORD timeout = 5000;
+    DWORD timeout = 1000;
     setsockopt(serverSocket, SOL_SOCKET, SO_RCVTIMEO, (char *)&timeout, sizeof(timeout));
     return 1;
 }

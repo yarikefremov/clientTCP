@@ -6,13 +6,9 @@ void netThreadFunc(TCPClient* client){
     client->threadRecv();
 }
 
-int main() {
+int main(int argc, char** argv){
     NetworkGUIInterface inetgui;
-    //msgpckg msg{1u, "meepo", "walter", 0, "can i have some cookies from u?"};
-    //acceptpckg acc{2u, 1, 1};
-    //inetgui.setInputMsg(msg);
-    //inetgui.setAccept(acc);
-    TCPClient tcp(&inetgui);
+    TCPClient tcp(&inetgui, argc > 1? argv[1]:"127.0.0.1");
     GUI gui(&inetgui);
     std::thread netThread(netThreadFunc, &tcp);
     gui.netThread = &netThread;
