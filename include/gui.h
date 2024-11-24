@@ -4,7 +4,6 @@
 #include "inetgui.h"
 #include <chrono>
 #include <thread>
-#include <iostream>
 
 class ChatLog{
 public:

@@ -69,11 +69,11 @@ void GUI::loop(){
                 auto it = std::find(users.begin(), users.end(), std::string(newMsg.srcname));
                 if(it != users.end()){
                     //Нашли, добавляем сообщение к этому пользователю
-                    chatLog.log[it - users.begin()].push_back(sf::Text(sf::String(newMsg.msg), font, 14));
                     sf::Text msg(sf::String(newMsg.srcname)+": "+sf::String(newMsg.msg), font, 14);
                     msg.setFillColor(sf::Color(0x1B1B1BFF));
                     msg.setPosition(20.f, 20.f + chatLog.log[selectedUserIndex].size() * 25.f); // Располагаем сообщения друг под другом
-                    chatLog.log.push_back({msg});
+                    chatLog.log[it - users.begin()].push_back(msg);
+                    redrawUsers();
                 }
                 else{
                     //Добавляем пользователя + к нему сообщение

@@ -8,12 +8,9 @@ void netThreadFunc(TCPClient* client){
 
 int main() {
     NetworkGUIInterface inetgui;
-    //msgpckg msg{1u, "meepo", "walter", 0, "can i have some cookies from u?"};
-    //acceptpckg acc{2u, 1, 1};
-    //inetgui.setInputMsg(msg);
-    //inetgui.setAccept(acc);
     TCPClient tcp(&inetgui);
     GUI gui(&inetgui);
+    tcp.threadRecv();
     std::thread netThread(netThreadFunc, &tcp);
     gui.netThread = &netThread;
     gui.init();

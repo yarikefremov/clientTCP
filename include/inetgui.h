@@ -2,7 +2,6 @@
 #define INETGUI_H
 #include <mutex>
 #include "pckg.h"
-#include <iostream>
 class NetworkGUIInterface{
 private:
     std::mutex m_mutex;

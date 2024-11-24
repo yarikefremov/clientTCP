@@ -1,11 +1,11 @@
 #include "../include/inetgui.h"
-
+#include <iostream>
 NetworkGUIInterface::NetworkGUIInterface(){
 
 }
 
 bool NetworkGUIInterface::setAuth(authpckg& data){
-    std::cout<<"setAuth"<<std::endl;
+    std::cout<<"i1";
     if(flags[2]) return 0;
     std::lock_guard <std::mutex> guard(m_mutex);
     this->sending_req = data;
@@ -14,7 +14,7 @@ bool NetworkGUIInterface::setAuth(authpckg& data){
 }
 
 bool NetworkGUIInterface::getAuth(authpckg& dst){
-    std::cout<<"getAuth"<<std::endl;
+    std::cout<<"i2";
     if(!flags[2]) return 0;
     std::lock_guard <std::mutex> guard(m_mutex);
     dst = this->sending_req;
@@ -23,7 +23,7 @@ bool NetworkGUIInterface::getAuth(authpckg& dst){
 }
 
 bool NetworkGUIInterface::setAccept(acceptpckg& data){
-    std::cout<<"setAccept"<<std::endl;
+    std::cout<<"i3";
     if(flags[3]) return 0;
     std::lock_guard <std::mutex> guard(m_mutex);
     this->accepted_req = data;
@@ -32,7 +32,7 @@ bool NetworkGUIInterface::setAccept(acceptpckg& data){
 }
 
 bool NetworkGUIInterface::getAccept(acceptpckg& dst){
-    std::cout<<"getAccept"<<std::endl;
+    std::cout<<"i4";
     if(!flags[3]) return 0;
     std::lock_guard <std::mutex> guard(m_mutex);
     dst = this->accepted_req;
@@ -41,7 +41,7 @@ bool NetworkGUIInterface::getAccept(acceptpckg& dst){
 }
 
 bool NetworkGUIInterface::setInputMsg(msgpckg& data){
-    std::cout<<"setInputMsg"<<std::endl;
+    std::cout<<"i5";
     if(flags[0]) return 0;
     std::lock_guard <std::mutex> guard(m_mutex);
     this->sending_msg = data;
@@ -50,7 +50,7 @@ bool NetworkGUIInterface::setInputMsg(msgpckg& data){
 }
 
 bool NetworkGUIInterface::getInputMsg(msgpckg& dst){
-    std::cout<<"getInputMsg"<<std::endl;
+    std::cout<<"i6";
     if(!flags[0]) return 0;
     std::lock_guard <std::mutex> guard(m_mutex);
     dst = this->sending_msg;
@@ -59,7 +59,7 @@ bool NetworkGUIInterface::getInputMsg(msgpckg& dst){
 }
 
 bool NetworkGUIInterface::setOutputMsg(msgpckg& data){
-    std::cout<<"setOutputMsg"<<std::endl;
+    std::cout<<"i7";
     if(flags[1]) return 0;
     std::lock_guard <std::mutex> guard(m_mutex);
     this->received_msg = data;
@@ -68,7 +68,7 @@ bool NetworkGUIInterface::setOutputMsg(msgpckg& data){
 }
 
 bool NetworkGUIInterface::getOutputMsg(msgpckg& dst){
-    std::cout<<"getOutputMsg"<<std::endl;
+    std::cout<<"i8";
     if(!flags[1]) return 0;
     std::lock_guard <std::mutex> guard(m_mutex);
     dst = this->received_msg;

@@ -5,7 +5,8 @@
 #include <WS2tcpip.h>
 #include "pckg.h"
 #include "inetgui.h"
-#include <iostream>
+#include <thread>
+#include <chrono>
 
 class TCPClient
 {
@@ -25,12 +26,11 @@ public:
 private:
     NetworkGUIInterface* inetgui;
     void createSocket();
-    std::string serverIP = "127.0.0.1";
     int serverPort = 54010;
     sockaddr_in hint;
     SOCKET serverSocket;		//This is the socket we will connect to.
     char buf[sizeof(msgpckg)];
-
+    std::string serverIP = "127.0.0.1";
     acceptpckg acc;
     authpckg regpckg;
     msgpckg msg;
