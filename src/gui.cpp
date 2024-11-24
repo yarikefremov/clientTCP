@@ -7,7 +7,7 @@ GUI::GUI(NetworkGUIInterface* inetgui){
 void GUI::init(){
     window.setActive();
     if (!font.loadFromFile("../../../resources/Anonymous_Pro.ttf")) {
-        font.loadFromFile("/resources/Anonymous_Pro.ttf");
+        if(!font.loadFromFile("/resources/Anonymous_Pro.ttf")) font.loadFromFile("Anonymous_Pro.ttf");
     }
     window.setFramerateLimit(60);
 
