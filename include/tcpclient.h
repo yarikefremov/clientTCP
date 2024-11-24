@@ -2,14 +2,10 @@
 #define TCPCLIENT_H
 
 #include <string>
-#include <thread>
 #include <WS2tcpip.h>
 #include "pckg.h"
 #include "inetgui.h"
-
-class TCPClient;
-
-typedef void(*MessageReceivedHandler)(std::string msg);
+#include <iostream>
 
 class TCPClient
 {
@@ -19,10 +15,9 @@ public:
     ~TCPClient();
     bool initWinsock();
     bool connectSock();
-    bool auth(bool loginflag, std::string& username, std::string& password);
+    void auth();
     void sendMsg(std::string txt);
     void threadRecv();
-    std::thread recvThread;
     std::string username;
     bool joinChat = true;
     std::string password;
@@ -34,9 +29,11 @@ private:
     int serverPort = 54010;
     sockaddr_in hint;
     SOCKET serverSocket;		//This is the socket we will connect to.
-    bool recvThreadRunning = 0;
     char buf[sizeof(msgpckg)];
-    authpckg regpkcg;
+
+    acceptpckg acc;
+    authpckg regpckg;
+    msgpckg msg;
 
 };
 

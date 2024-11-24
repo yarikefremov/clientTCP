@@ -1,10 +1,11 @@
 #include "../include/gui.h"
 
-GUI::GUI(NetworkGUIInterface inetgui){
+GUI::GUI(NetworkGUIInterface* inetgui){
     this->inetgui = inetgui;
 }
 
 void GUI::init(){
+    window.setActive();
     if (!font.loadFromFile("../../../resources/Anonymous_Pro.ttf")) {
         font.loadFromFile("/resources/Anonymous_Pro.ttf");
     }
@@ -54,6 +55,8 @@ void GUI::loop(){
 
         while (window.pollEvent(event)) {
             if (event.type == sf::Event::Closed) {
+                inetgui->netstop();
+                netThread->join();
                 window.close();
             }
 
@@ -61,7 +64,27 @@ void GUI::loop(){
             if (event.type == sf::Event::TextEntered)        inputTextEventHandler();
             if (event.type == sf::Event::KeyPressed) keyEventHandler();
         }
-        //inetgui.getInputMsg();
+        if(isChatMode && inetgui->flags[0])
+            if(inetgui->getInputMsg(this->newMsg)){
+                auto it = std::find(users.begin(), users.end(), std::string(newMsg.srcname));
+                if(it != users.end()){
+                    //Нашли, добавляем сообщение к этому пользователю
+                    chatLog.log[it - users.begin()].push_back(sf::Text(sf::String(newMsg.msg), font, 14));
+                    sf::Text msg(sf::String(newMsg.srcname)+": "+sf::String(newMsg.msg), font, 14);
+                    msg.setFillColor(sf::Color(0x1B1B1BFF));
+                    msg.setPosition(20.f, 20.f + chatLog.log[selectedUserIndex].size() * 25.f); // Располагаем сообщения друг под другом
+                    chatLog.log.push_back({msg});
+                }
+                else{
+                    //Добавляем пользователя + к нему сообщение
+                    users.push_back(newMsg.srcname);
+                    sf::Text msg(sf::String(newMsg.srcname)+": "+sf::String(newMsg.msg), font, 14);
+                    msg.setFillColor(sf::Color(0x1B1B1BFF));
+                    msg.setPosition(20.f, 20.f); // Располагаем сообщения друг под другом
+                    chatLog.log.push_back({msg});
+                    redrawUsers();
+                }
+            }
         draw();
     }
 }
@@ -82,9 +105,14 @@ void GUI::mouseEventHandler(){
     }
 
     if (okButton.getGlobalBounds().contains(mousePos)) {
-        //inetgui.setAuth();
-        //inetgui.getAccept();
-        isChatMode = true; // Переходим в режим чата
+        if(nameInput.getSize() == 0 || passwordInput.getSize() == 0) return;
+        auth.loginflag = !isRegisterMode;
+        memcpy(auth.username, nameInput.toAnsiString().c_str(), 33);
+        memcpy(auth.password, passwordInput.toAnsiString().c_str(), 33);
+        while(!inetgui->setAuth(auth)) std::this_thread::sleep_for(std::chrono::milliseconds(1000));
+        while(!inetgui->getAccept(acc)) std::this_thread::sleep_for(std::chrono::milliseconds(1000));
+        memcpy(ownMsg.srcname, auth.username, 33);
+        isChatMode = acc.ans; // Переходим в режим чата
     }
 
     if (nameField.getGlobalBounds().contains(mousePos)) {
@@ -137,24 +165,30 @@ void GUI::inputTextEventHandler(){
 
 void GUI::keyEventHandler(){
     if (event.key.code == sf::Keyboard::Up) {
-        selectedUserIndex = (selectedUserIndex - 1 + users.size()) % users.size();
+        selectedUserIndex = (selectedUserIndex - 1) % users.size(); //0-0 1-1 2-2 3-3 4-4 5-0
     }
     else if (event.key.code == sf::Keyboard::Down)
         selectedUserIndex = (selectedUserIndex + 1) % users.size();
     else if (event.key.code == sf::Keyboard::Enter)
         if(!currentMessage.isEmpty()) {
             if(isAddingUsername){
-                users.push_back(currentMessage.toAnsiString());
+                if(std::find(users.begin(), users.end(), currentMessage.toAnsiString()) == users.end()){
+                    users.push_back(currentMessage.toAnsiString());
+                    chatLog.log.push_back({sf::Text()});
+                }
                 currentMessage.clear();
                 messageDisplay.setString(currentMessage);
                 isAddingUsername = 0;
                 return redrawUsers();
             }
-            //inetgui.setOutputMsg();
-            sf::Text newChatLine(nameInput+": "+currentMessage, font, 20);
+
+            memcpy(ownMsg.dstname, users[selectedUserIndex].c_str(), 33);
+            memcpy(ownMsg.msg, currentMessage.toAnsiString().c_str(), 100);
+            inetgui->setOutputMsg(ownMsg);
+            sf::Text newChatLine(nameInput+": "+currentMessage, font, 14);
             newChatLine.setFillColor(sf::Color(0x1B1B1BFF));
-            newChatLine.setPosition(20.f, 20.f + chatLog.size() * 25.f); // Располагаем сообщения друг под другом
-            chatLog.push_back(newChatLine);
+            newChatLine.setPosition(20.f, 20.f + chatLog.log[selectedUserIndex].size() * 25.f); // Располагаем сообщения друг под другом
+            chatLog.log[selectedUserIndex].push_back(newChatLine);
             currentMessage.clear(); // Очищаем поле ввода
             messageDisplay.setString(currentMessage);
         }
@@ -196,7 +230,7 @@ void GUI::draw(){
         for (const auto& text : userTexts) {
             window.draw(text);
         }
-        for (const auto& line : chatLog) {
+        for (const auto& line : chatLog.log[selectedUserIndex % users.size()]) {
             window.draw(line);
         }
         window.draw(messageInputField);
@@ -211,10 +245,9 @@ void GUI::redrawUsers(){
     userTexts.clear();
     userTexts.reserve(users.size());
     for (size_t i = 0; i < users.size(); ++i) {
-        userTexts.push_back(sf::Text(users[i], font, 20));
+        userTexts.push_back(sf::Text(users[i], font, 18));
         userTexts[i].setFont(font);
         userTexts[i].setString(users[i]);
-        userTexts[i].setCharacterSize(24);
-        userTexts[i].setPosition(100.f, 100.f + i * 40.f);
+        userTexts[i].setPosition(600.f, 20.f + i * 20.f);
     }
 }

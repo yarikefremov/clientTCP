@@ -15,9 +15,9 @@
 #include <iostream>
 #include <string>
 #include <thread>
+#include <chrono>
 
 using namespace std;
-
 
 //When we create the client, we do not want the thread to run & try to receive data from the server until
 TCPClient::TCPClient(NetworkGUIInterface* inetgui)
@@ -26,9 +26,6 @@ TCPClient::TCPClient(NetworkGUIInterface* inetgui)
     if (initWinsock()) {
         createSocket();
         connectSock();
-
-        recvThread = std::thread();//TODO FIX
-        recvThread.detach();
     }
 }
 
@@ -36,10 +33,6 @@ TCPClient::~TCPClient()
 {
     closesocket(serverSocket);
     WSACleanup();
-    if (recvThreadRunning) {
-        recvThreadRunning = false;
-        recvThread.join();	//Destroy safely to thread.
-    }
 }
 
 
@@ -67,23 +60,28 @@ void TCPClient::createSocket() {
     hint.sin_family = AF_INET;
     hint.sin_port = htons(serverPort);
     inet_pton(AF_INET, serverIP.c_str(), &hint.sin_addr);
-
 }
 
 void TCPClient::threadRecv(){
 
-    recvThreadRunning = true;
-    while (recvThreadRunning) {
+    while (inetgui->isNetRunning()) {
         
         //inetgui all 4 funcs in this loop
         ZeroMemory(buf, sizeof(buf));
 
-        int bytesReceived = recv(serverSocket, buf, sizeof(buf), 0);
-        if (bytesReceived > 0) { //If client disconnects, bytesReceived = 0; if error, bytesReceived = -1;
+        if(inetgui->getAuth(regpckg)){
+            auth();
+        }
 
+        if(inetgui->getOutputMsg(msg)){
+            send(serverSocket, (const char*)(&msg), sizeof(msgpckg), 0);
+        }
+        int bytesReceived = recv(serverSocket, buf, sizeof(buf), 0);
+        std::cout<<"bytesReceived: " << bytesReceived <<std::endl;
+        if (bytesReceived > 0) { //If client disconnects, bytesReceived = 0; if error, bytesReceived = -1;
             if(buf[0] == 1u){
-                //At this step we should netgui interface
-                std::cout << string(buf+1, 33) <<": " << string(buf+68, 100) << std::endl;
+                memcpy(&msg, buf, sizeof(msgpckg));
+                while(inetgui->setInputMsg(msg)) std::this_thread::sleep_for(std::chrono::milliseconds(50));
             }
         }
 
@@ -100,29 +98,14 @@ bool TCPClient::connectSock() {
         WSACleanup();
         return 0;
     }
+    DWORD timeout = 5000;
+    setsockopt(serverSocket, SOL_SOCKET, SO_RCVTIMEO, (char *)&timeout, sizeof(timeout));
     return 1;
 }
 
-bool TCPClient::auth(bool loginflag, std::string& username, std::string& password){
-
-    this->username = username;
-    this->password = password;
-    memcpy(regpkcg.username, this->username.c_str(), sizeof(username));
-    memcpy(regpkcg.password, this->password.c_str(), sizeof(password));
-    send(serverSocket, (const char*)(&regpkcg), sizeof(authpckg), 0);
+void TCPClient::auth(){
+    send(serverSocket, (const char*)(&regpckg), sizeof(authpckg), 0);
     recv(serverSocket, buf, sizeof(buf), 0);
-    if(buf[0] != 2u) return 0;
-    return buf[2];
-}
-
-void TCPClient::sendMsg(string txt) {
-
-    if (!txt.empty() && serverSocket != INVALID_SOCKET) {
-
-        send(serverSocket, txt.c_str(), txt.size() + 1, 0);
-
-        //It wouldn't work with the previous version bc while we were constantly listening for received msgs, we would keep caling this fct.
-        //This fct would send the message & try to handle the receiving too. It would get stuck while waiting for a received msg.
-    }
-
+    memcpy(&acc, buf, sizeof(acc));
+    while(!inetgui->setAccept(acc)) std::this_thread::sleep_for(std::chrono::milliseconds(50));
 }

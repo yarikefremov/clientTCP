@@ -2,11 +2,22 @@
 #define GUI_H
 #include <SFML/Graphics.hpp>
 #include "inetgui.h"
+#include <chrono>
+#include <thread>
+#include <iostream>
+
+class ChatLog{
+public:
+    std::vector<std::vector<sf::Text>> log{{}};
+    std::vector<unsigned> lineNum;
+private:
+};
 
 class GUI{
 public:
     GUI(NetworkGUIInterface *inetgui);
     void init();
+    std::thread* netThread;
 private:
 
     bool enteringName = false;
@@ -16,12 +27,12 @@ private:
     bool isAddingUsername = false;
     NetworkGUIInterface* inetgui;
     sf::String nameInput, passwordInput, currentMessage;
-    std::vector<sf::Text> chatLog;
-    std::vector<std::string> users{"123", "key77", "gregor12", "michael1907"};
-    int selectedUserIndex = 1;
+    ChatLog chatLog;
+    std::vector<std::string> users{"Favourites"};
+    int selectedUserIndex = 0;
     std::vector<sf::Text> userTexts;
 
-    sf::RenderWindow window = sf::RenderWindow(sf::VideoMode(800, 600), "TCP CHAT");
+    sf::RenderWindow window = sf::RenderWindow(sf::VideoMode(800, 600), "TCP CHAT", sf::Style::Titlebar | sf::Style::Close);
     sf::Font font;
     sf::Vector2f windowCenter = sf::Vector2f(window.getSize().x / 2.f, window.getSize().y / 2.f);
 
@@ -47,5 +58,10 @@ private:
     void keyEventHandler();
     void draw();
     void redrawUsers();
+
+    msgpckg newMsg;
+    authpckg auth;
+    acceptpckg acc;
+    msgpckg ownMsg;
 };
 #endif // GUI_H

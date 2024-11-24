@@ -2,6 +2,7 @@
 #define INETGUI_H
 #include <mutex>
 #include "pckg.h"
+#include <iostream>
 class NetworkGUIInterface{
 private:
     std::mutex m_mutex;
@@ -9,7 +10,7 @@ private:
     msgpckg received_msg;       //net -> gui
     authpckg sending_req;       //gui -> net
     acceptpckg accepted_req;    //net -> gui
-    bool flags[4]{0, 0, 0, 0};
+    bool net_stop = 0;
 public:
     NetworkGUIInterface();
     
@@ -24,5 +25,10 @@ public:
     bool getAuth(authpckg& dst);
     bool setOutputMsg(msgpckg& data);
     bool getOutputMsg(msgpckg& dst);
+
+    void netstop();
+    bool isNetRunning();
+
+    bool flags[4]{0, 0, 0, 0};
 };
 #endif

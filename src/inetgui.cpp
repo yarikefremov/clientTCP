@@ -5,6 +5,7 @@ NetworkGUIInterface::NetworkGUIInterface(){
 }
 
 bool NetworkGUIInterface::setAuth(authpckg& data){
+    std::cout<<"setAuth"<<std::endl;
     if(flags[2]) return 0;
     std::lock_guard <std::mutex> guard(m_mutex);
     this->sending_req = data;
@@ -13,6 +14,7 @@ bool NetworkGUIInterface::setAuth(authpckg& data){
 }
 
 bool NetworkGUIInterface::getAuth(authpckg& dst){
+    std::cout<<"getAuth"<<std::endl;
     if(!flags[2]) return 0;
     std::lock_guard <std::mutex> guard(m_mutex);
     dst = this->sending_req;
@@ -21,6 +23,7 @@ bool NetworkGUIInterface::getAuth(authpckg& dst){
 }
 
 bool NetworkGUIInterface::setAccept(acceptpckg& data){
+    std::cout<<"setAccept"<<std::endl;
     if(flags[3]) return 0;
     std::lock_guard <std::mutex> guard(m_mutex);
     this->accepted_req = data;
@@ -29,6 +32,7 @@ bool NetworkGUIInterface::setAccept(acceptpckg& data){
 }
 
 bool NetworkGUIInterface::getAccept(acceptpckg& dst){
+    std::cout<<"getAccept"<<std::endl;
     if(!flags[3]) return 0;
     std::lock_guard <std::mutex> guard(m_mutex);
     dst = this->accepted_req;
@@ -37,6 +41,7 @@ bool NetworkGUIInterface::getAccept(acceptpckg& dst){
 }
 
 bool NetworkGUIInterface::setInputMsg(msgpckg& data){
+    std::cout<<"setInputMsg"<<std::endl;
     if(flags[0]) return 0;
     std::lock_guard <std::mutex> guard(m_mutex);
     this->sending_msg = data;
@@ -45,6 +50,7 @@ bool NetworkGUIInterface::setInputMsg(msgpckg& data){
 }
 
 bool NetworkGUIInterface::getInputMsg(msgpckg& dst){
+    std::cout<<"getInputMsg"<<std::endl;
     if(!flags[0]) return 0;
     std::lock_guard <std::mutex> guard(m_mutex);
     dst = this->sending_msg;
@@ -53,6 +59,7 @@ bool NetworkGUIInterface::getInputMsg(msgpckg& dst){
 }
 
 bool NetworkGUIInterface::setOutputMsg(msgpckg& data){
+    std::cout<<"setOutputMsg"<<std::endl;
     if(flags[1]) return 0;
     std::lock_guard <std::mutex> guard(m_mutex);
     this->received_msg = data;
@@ -61,9 +68,19 @@ bool NetworkGUIInterface::setOutputMsg(msgpckg& data){
 }
 
 bool NetworkGUIInterface::getOutputMsg(msgpckg& dst){
+    std::cout<<"getOutputMsg"<<std::endl;
     if(!flags[1]) return 0;
     std::lock_guard <std::mutex> guard(m_mutex);
     dst = this->received_msg;
     flags[1] = 0;
     return 1;
+}
+
+void NetworkGUIInterface::netstop(){
+    std::lock_guard <std::mutex> guard(m_mutex);
+    net_stop = 1;
+}
+
+bool NetworkGUIInterface::isNetRunning(){
+    return !net_stop;
 }
