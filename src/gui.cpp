@@ -1,253 +1,495 @@
 #include "../include/gui.h"
 
-GUI::GUI(NetworkGUIInterface* inetgui){
-    this->inetgui = inetgui;
-}
+GUI::GUI (NetworkGUIInterface *inetgui_ptr) { m_inetgui_ptr = inetgui_ptr; }
 
 void GUI::init(){
-    window.setActive();
-    if (!font.loadFromFile("../../../resources/Anonymous_Pro.ttf")) {
-        font.loadFromFile("/resources/Anonymous_Pro.ttf");
-    }
-    window.setFramerateLimit(60);
 
-    nameField.setPosition(windowCenter.x - 50.f, windowCenter.y - 50.f);
-    nameField.setFillColor(sf::Color(0xFFFFFFFF));
-    nameField.setOutlineThickness(2.f);
-    nameField.setOutlineColor(sf::Color(0x2C3987FF));
-    passwordField.setPosition(windowCenter.x - 50.f, windowCenter.y + 50.f);
-    passwordField.setFillColor(sf::Color(0xFFFFFFFF));
-    passwordField.setOutlineThickness(2.f);
-    passwordField.setOutlineColor(sf::Color(0x2C3987FF));
-    messageInputField.setPosition(windowCenter.x - 300.f, window.getSize().y - 60.f);
-    messageInputField.setFillColor(sf::Color(0xFFFFFFFF));
-    messageInputField.setOutlineThickness(2.f);
-    messageInputField.setOutlineColor(sf::Color(0x2C3987FF));
+  // Загрузка шрифта
+  // 1 и 2 для разработки, 3 - для выпуска
+  // if (!m_font.loadFromFile ("../../../resources/Anonymous_Pro.ttf"))
+  // if (!m_font.loadFromFile ("/resources/Anonymous_Pro.ttf"))
+  m_font.loadFromFile ("Anonymous_Pro.ttf");
 
-    loginButton.    setFillColor(sf::Color(0x1B1B1BFF));
-    registerButton. setFillColor(sf::Color(0x1B1B1BFF));
-    okButton.       setFillColor(sf::Color(0x1B1B1BFF));
-    nameText.       setFillColor(sf::Color(0x1B1B1BFF));
-    passwordText.   setFillColor(sf::Color(0x1B1B1BFF));
-    nameDisplay.    setFillColor(sf::Color(0x1B1B1BFF));
-    passwordDisplay.setFillColor(sf::Color(0x1B1B1BFF));
-    messageDisplay. setFillColor(sf::Color(0x1B1B1BFF));
-    chatLine.       setFillColor(sf::Color(0x1B1B1BFF));
-    newDialogText.  setFillColor(sf::Color(0x2C3987FF));
-    loginButton.    setPosition(windowCenter.x - 150.f, windowCenter.y - 150.f);
-    registerButton. setPosition(windowCenter.x + 50.f, windowCenter.y - 150.f);
-    okButton.       setPosition(windowCenter.x - 50.f, windowCenter.y + 150.f);
-    nameText.       setPosition(windowCenter.x - 250.f, windowCenter.y - 50.f);
-    passwordText.   setPosition(windowCenter.x - 250.f, windowCenter.y + 50.f);
-    nameDisplay.    setPosition(windowCenter.x - 45.f, windowCenter.y - 45.f);
-    passwordDisplay.setPosition(windowCenter.x - 45.f, windowCenter.y + 55.f);
-    messageDisplay. setPosition(messageInputField.getPosition().x + 10.f, messageInputField.getPosition().y + 5.f);
-    newDialogText.  setPosition(messageInputField.getPosition().x - 30.f, messageInputField.getPosition().y - messageInputField.getSize().y/2+6);
+  // ФПС
+  m_window.setFramerateLimit (30);
 
-    redrawUsers();
+  // Цвет, позиция, толщина линий прямоугольников
+  m_name_field.setPosition (CENTER_X - 50.f, CENTER_Y - 50.f);
+  m_name_field.setFillColor (WHITE_COLOR);
+  m_name_field.setOutlineThickness (2.f);
+  m_name_field.setOutlineColor (BLUE_COLOR);
 
-    loop();
+  m_password_field.setPosition (CENTER_X - 50.f, CENTER_Y + 50.f);
+  m_password_field.setFillColor (WHITE_COLOR);
+  m_password_field.setOutlineThickness (2.f);
+  m_password_field.setOutlineColor (BLUE_COLOR);
+
+  m_message_input_field.setPosition (CENTER_X - 300.f, WINDOW_HEIGHT - 60.f);
+  m_message_input_field.setFillColor (WHITE_COLOR);
+  m_message_input_field.setOutlineThickness (2.f);
+  m_message_input_field.setOutlineColor (BLUE_COLOR);
+
+  // Цвет текста и расположение всех Text
+  m_login_button.setFillColor (BLACK_COLOR);
+  m_register_button.setFillColor (BLACK_COLOR);
+  m_ok_button.setFillColor (BLACK_COLOR);
+  m_name_label.setFillColor (BLACK_COLOR);
+  m_password_label.setFillColor (BLACK_COLOR);
+  m_name_display.setFillColor (BLACK_COLOR);
+  m_password_display.setFillColor (BLACK_COLOR);
+  m_message_display.setFillColor (BLACK_COLOR);
+  m_new_dialog_sign.setFillColor (BLUE_COLOR);
+  m_message_label.setFillColor (BLACK_COLOR);
+  m_error_label.setFillColor (RED_COLOR);
+  m_login_button.setPosition (CENTER_X - 150.f, CENTER_Y - 150.f);
+  m_register_button.setPosition (CENTER_X + 50.f, CENTER_Y - 150.f);
+  m_ok_button.setPosition (CENTER_X - 50.f, CENTER_Y + 150.f);
+  m_name_label.setPosition (CENTER_X - 250.f, CENTER_Y - 50.f);
+  m_password_label.setPosition (CENTER_X - 250.f, CENTER_Y + 50.f);
+  m_error_label.setPosition (CENTER_X - 100.f, CENTER_Y + 200.f);
+  m_name_display.setPosition (CENTER_X - 45.f, CENTER_Y - 45.f);
+  m_password_display.setPosition (CENTER_X - 45.f, CENTER_Y + 55.f);
+  m_message_display.setPosition (m_message_input_field.getPosition ().x + 10.f,
+                                 m_message_input_field.getPosition ().y + 5.f);
+  m_new_dialog_sign.setPosition (m_message_input_field.getPosition ().x - 30.f,
+                                 m_message_input_field.getPosition ().y
+                                     - m_message_input_field.getSize ().y / 2
+                                     + 6);
+
+  // Перерисовка ListModel
+  redrawUsers ();
+
+  // Вечный цикл
+  loop ();
 }
 
 void GUI::loop(){
 
-    while (window.isOpen()) {
+  // Пока окно открыто крутится цикл, в конце рисуем картинку
+  for (; m_window.isOpen (); draw ())
+    {
 
-        while (window.pollEvent(event)) {
-            if (event.type == sf::Event::Closed) {
-                inetgui->netstop();
-                netThread->join();
-                window.close();
+      // 1. Обработчик GUI событий
+      while (m_window.pollEvent (m_event))
+        {
+
+          // Если окно закрывается перехватываем поток и его тоже закрываем,
+          if (m_event.type == sf::Event::Closed)
+            {
+              m_inetgui_ptr->netstop ();
+              m_net_thread_ptr->join ();
+              m_window.close ();
             }
 
-            if (event.type == sf::Event::MouseButtonPressed) mouseEventHandler();
-            if (event.type == sf::Event::TextEntered)        inputTextEventHandler();
-            if (event.type == sf::Event::KeyPressed) keyEventHandler();
+          if (m_event.type == sf::Event::MouseButtonPressed)
+            mouseEventHandler ();
+          if (m_event.type == sf::Event::TextEntered)
+            inputTextEventHandler ();
+          if (m_event.type == sf::Event::KeyPressed)
+            keyEventHandler ();
         }
-        if(isChatMode && inetgui->flags[0])
-            if(inetgui->getInputMsg(this->newMsg)){
-                auto it = std::find(users.begin(), users.end(), std::string(newMsg.srcname));
-                if(it != users.end()){
-                    //Нашли, добавляем сообщение к этому пользователю
-                    sf::Text msg(sf::String(newMsg.srcname)+": "+sf::String(newMsg.msg), font, 14);
-                    msg.setFillColor(sf::Color(0x1B1B1BFF));
-                    msg.setPosition(20.f, 20.f + chatLog.log[selectedUserIndex].size() * 25.f); // Располагаем сообщения друг под другом
-                    chatLog.log[it - users.begin()].push_back(msg);
-                    redrawUsers();
-                }
-                else{
-                    //Добавляем пользователя + к нему сообщение
-                    users.push_back(newMsg.srcname);
-                    sf::Text msg(sf::String(newMsg.srcname)+": "+sf::String(newMsg.msg), font, 14);
-                    msg.setFillColor(sf::Color(0x1B1B1BFF));
-                    msg.setPosition(20.f, 20.f); // Располагаем сообщения друг под другом
-                    chatLog.log.push_back({msg});
-                    redrawUsers();
-                }
-            }
-        draw();
+
+      // 2. Обработчик входящих от tcpclient пакетов
+      netHandle ();
     }
 }
 
 void GUI::mouseEventHandler(){
-    sf::Vector2f mousePos = window.mapPixelToCoords(sf::Mouse::getPosition(window));
 
-    if (loginButton.getGlobalBounds().contains(mousePos)) {
-        enteringName = true;
-        enteringPassword = false;
-        isRegisterMode = false; // Переходим в режим авторизации
+  // Получаем координаты мыши во время нажатия
+  sf::Vector2f mousePos
+      = m_window.mapPixelToCoords (sf::Mouse::getPosition (m_window));
+
+  // Если пользователь нажал на кнопку логина, то переходим в режим авторизации
+  if (m_login_button.getGlobalBounds ().contains (mousePos))
+    {
+      m_is_entering_name = true;
+      m_is_register_mode = false;
     }
 
-    if (registerButton.getGlobalBounds().contains(mousePos)) {
-        enteringName = true;
-        enteringPassword = false;
-        isRegisterMode = true; // Переходим в режим регистрации
+  // Если пользователь нажал на кнопку register, то переходим в режим
+  // регистрации
+  if (m_register_button.getGlobalBounds ().contains (mousePos))
+    {
+      m_is_entering_name = true;
+      m_is_register_mode = true; // Переходим в режим регистрации
     }
 
-    if (okButton.getGlobalBounds().contains(mousePos)) {
-        if(nameInput.getSize() == 0 || passwordInput.getSize() == 0) return;
-        auth.loginflag = !isRegisterMode;
-        memcpy(auth.username, nameInput.toAnsiString().c_str(), 33);
-        memcpy(auth.password, passwordInput.toAnsiString().c_str(), 33);
-        while(!inetgui->setAuth(auth)) std::this_thread::sleep_for(std::chrono::milliseconds(1000));
-        while(!inetgui->getAccept(acc)) std::this_thread::sleep_for(std::chrono::milliseconds(1000));
-        memcpy(ownMsg.srcname, auth.username, 33);
-        isChatMode = acc.ans; // Переходим в режим чата
+  // Пользователь нажимает ок и программа отправляет на сервер информацию
+  if (m_ok_button.getGlobalBounds ().contains (mousePos))
+    {
+
+      // Если имя и или пароль пустые, то пользователь не залогинится
+      if (m_name_input.getSize () == 0 || m_password_input.getSize () == 0)
+        return;
+
+      // Заправляем данные в пакет
+      m_auth_pack.loginflag = !m_is_register_mode;
+      memcpy (m_auth_pack.username, m_name_input.toAnsiString ().c_str (),
+              NAME_LENGHT);
+      memcpy (m_auth_pack.password, m_password_input.toAnsiString ().c_str (),
+              PASSWORD_LENGHT);
+
+      // Отправляем в интерфейс данные
+      m_inetgui_ptr->setAuth (m_auth_pack);
+
+      // Чуть-чуть ждем, чтобы tcpclient оклемался и отправил данные на сервер
+      std::this_thread::sleep_for (std::chrono::seconds (1));
+
+      // Попытка получить ответ из интерфейса (его должен туда запихнуть
+      // tcpclient)
+      if (m_inetgui_ptr->getAccept (m_accept_pack))
+        {
+
+          // Копируем имя, которое отправили серверу в пакет исходящего
+          // сообщения, чтобы лишний раз этого не делать
+          memcpy (m_output_msg.srcname, m_auth_pack.username, NAME_LENGHT);
+
+          // Если сервер живой и пользователь правильно ввел данные, то
+          // переходим в режим чата
+          if (m_accept_pack.ans)
+            {
+              m_is_chat_mode = 1;
+            }
+
+          // Иначе говорим, что ошибка (сервер не принял наши данные, случается
+          // когда при логине неверно имя или пароль введены)
+          else
+            {
+              m_is_error_occured = 1;
+            }
+        }
+
+      // Ответа от сервера нет, либо tcpclient запыхался, в любом случае ошибка
+      else
+        {
+          m_is_error_occured = 1;
+        }
     }
 
-    if (nameField.getGlobalBounds().contains(mousePos)) {
-        enteringName = true;
-        enteringPassword = false;
+  // Кликаешь на имя - значит вводишь имя (возможно будет баг, если кликнуть
+  // туда в режиме чата...)
+  if (m_name_field.getGlobalBounds ().contains (mousePos))
+    {
+      m_is_entering_name = true;
     }
 
-    if (passwordField.getGlobalBounds().contains(mousePos)) {
-        enteringName = false;
-        enteringPassword = true;
+  // Если кликаешь на пароль, значит вводишь пароль
+  if (m_password_field.getGlobalBounds ().contains (mousePos))
+    {
+      m_is_entering_name = false;
     }
 
-    if(newDialogText.getGlobalBounds().contains(mousePos)) {
-        isAddingUsername = isAddingUsername ? 0 : 1 ;
+  // Кликаешь на кнопку добавления (плюс слева от поля для ввода сообщений)
+  if (m_new_dialog_sign.getGlobalBounds ().contains (mousePos))
+    {
+      m_is_adding_username = m_is_adding_username ? 0 : 1;
     }
 }
 
-void GUI::inputTextEventHandler(){
-    char enteredChar = static_cast<char>(event.text.unicode);
-    if (!isChatMode) {
+void
+GUI::inputTextEventHandler ()
+{
+  // Введенный символ сразу записываем
+  m_entered_char = static_cast<char> (m_event.text.unicode);
 
-        // Разрешаем только ASCII символы (0-127), исключая пробелы, и обрабатываем Backspace
-        if (enteredChar >= 33 && enteredChar <= 126) { // Исключаем пробел (32)
-            if (enteringName && nameInput.getSize() < 32) {
-                nameInput += enteredChar;
-            } else if (enteringPassword && passwordInput.getSize() < 32) {
-                passwordInput += enteredChar;
+  // Ввод имени или пароля в авторизации
+  if (!m_is_chat_mode)
+    {
+
+      // Разрешаем только ASCII символы (0-127), исключая пробелы, и
+      // обрабатываем Backspace
+      // Исключаем пробел (32)
+      if (m_entered_char >= 33 && m_entered_char <= 126)
+        {
+
+          // Записываем в поле имени
+          if (m_is_entering_name && m_name_input.getSize () < 32)
+            {
+              m_name_input += m_entered_char;
             }
-        } else if (event.text.unicode == 8) { // Backspace
-            if (enteringName && !nameInput.isEmpty()) {
-                nameInput.erase(nameInput.getSize() - 1);
-            } else if (enteringPassword && !passwordInput.isEmpty()) {
-                passwordInput.erase(passwordInput.getSize() - 1);
+
+          // Записываем в поле пароля
+          else if (m_password_input.getSize () < 32)
+            {
+              m_password_input += m_entered_char;
             }
         }
 
-        nameDisplay.setString(nameInput);
-        passwordDisplay.setString(passwordInput);
+      // Backspace
+      else if (m_event.text.unicode == 8)
+        {
+
+          // Удаляем символ в поле имени
+          if (m_is_entering_name && !m_name_input.isEmpty ())
+            {
+              m_name_input.erase (m_name_input.getSize () - 1);
+            }
+
+          // Удаляем символ в поле пароля
+          else if (!m_password_input.isEmpty ())
+            {
+              m_password_input.erase (m_password_input.getSize () - 1);
+            }
+        }
+
+      // В любом случае обновляем поля ввода имени и пароля
+      m_name_display.setString (m_name_input);
+      m_password_display.setString (m_password_input);
     }
-    else{
-        // Разрешаем только ASCII символы (0-127), включая пробелы, и обрабатываем Backspace
-        if ((enteredChar >= 32 && enteredChar <= 126) && currentMessage.getSize() < 99) { // 99 символов максимум
-            currentMessage += enteredChar;
-        } else if (event.text.unicode == 8 && !currentMessage.isEmpty()) { // Backspace
-            currentMessage.erase(currentMessage.getSize() - 1);
+
+  // Если мы в чате
+  else
+    {
+      // Разрешаем только ASCII символы (0-127), включая пробелы, и
+      // обрабатываем Backspace
+      // 99 символов максимум (+1 резерв для \0)
+
+      // Записываем символ в текущее сообщение (оно также может быть вводом
+      // имени нового пользователя)
+      if ((m_entered_char >= 32 && m_entered_char <= 126)
+          && m_current_message.getSize () < MSG_LENGHT - 1)
+        {
+          m_current_message += m_entered_char;
         }
-        messageDisplay.setString(currentMessage);
+
+      // Backspace
+      else if (m_event.text.unicode == 8 && !m_current_message.isEmpty ())
+        {
+          m_current_message.erase (m_current_message.getSize () - 1);
+        }
+
+      // Все равно обновляем наше сообщение
+      m_message_display.setString (m_current_message);
     }
 }
 
 void GUI::keyEventHandler(){
-    if (event.key.code == sf::Keyboard::Up) {
-        selectedUserIndex = (selectedUserIndex - 1) % users.size(); //0-0 1-1 2-2 3-3 4-4 5-0
+
+  // Кнопки пока функционируют только в чате, а в окне авторизации не
+  // функционируют
+  if (!m_is_chat_mode)
+    return;
+  // При нажатии стрелочки вверх выбираем пользователя выше по списку
+  if (m_event.key.code == sf::Keyboard::Up)
+    {
+      m_selected_index = (m_selected_index - 1) % m_users.size ();
     }
-    else if (event.key.code == sf::Keyboard::Down)
-        selectedUserIndex = (selectedUserIndex + 1) % users.size();
-    else if (event.key.code == sf::Keyboard::Enter)
-        if(!currentMessage.isEmpty()) {
-            if(isAddingUsername){
-                if(std::find(users.begin(), users.end(), currentMessage.toAnsiString()) == users.end()){
-                    users.push_back(currentMessage.toAnsiString());
-                    chatLog.log.push_back({sf::Text()});
-                }
-                currentMessage.clear();
-                messageDisplay.setString(currentMessage);
-                isAddingUsername = 0;
-                return redrawUsers();
+
+  // При нажатии стрелочки вниз выбираем пользователя ниже по списку
+  else if (m_event.key.code == sf::Keyboard::Down)
+    {
+      m_selected_index = (m_selected_index + 1) % m_users.size ();
+    }
+
+  // Enter
+  else if (m_event.key.code == sf::Keyboard::Enter)
+    {
+
+      // Если сообщение пустое, то особо-то и делать ничего не надо
+      if (m_current_message.isEmpty ())
+        return;
+
+      // Добавляем пользователя
+      if (m_is_adding_username)
+        {
+
+          // Пробуем его найти среди уже имеющихся в клиенте (не на
+          // сервере!!!), если не находим, то кидаем имя в конец вектора
+          if (std::find (m_users.begin (), m_users.end (),
+                         m_current_message.toAnsiString ())
+              == m_users.end ())
+            {
+              m_users.push_back (m_current_message.toAnsiString ());
+              m_chat_log.push_back ({ sf::Text () });
             }
 
-            memcpy(ownMsg.dstname, users[selectedUserIndex].c_str(), 33);
-            memcpy(ownMsg.msg, currentMessage.toAnsiString().c_str(), 100);
-            inetgui->setOutputMsg(ownMsg);
-            sf::Text newChatLine(nameInput+": "+currentMessage, font, 14);
-            newChatLine.setFillColor(sf::Color(0x1B1B1BFF));
-            newChatLine.setPosition(20.f, 20.f + chatLog.log[selectedUserIndex].size() * 25.f); // Располагаем сообщения друг под другом
-            chatLog.log[selectedUserIndex].push_back(newChatLine);
-            currentMessage.clear(); // Очищаем поле ввода
-            messageDisplay.setString(currentMessage);
+          // Очищаем сообщение, обновляем строку, выключаем режим добавления
+          // нового пользователя
+          m_current_message.clear ();
+          m_message_display.setString (m_current_message);
+          m_is_adding_username = 0;
+
+          // выходим, обязательно перерисовав ListModel пользователей
+          return redrawUsers ();
         }
+
+      // Обрабатываем сообщение
+      // Копируем данные в пакет
+      memcpy (m_output_msg.dstname, m_users[m_selected_index].c_str (),
+              NAME_LENGHT);
+      memcpy (m_output_msg.msg, m_current_message.toAnsiString ().c_str (),
+              MSG_LENGHT);
+
+      // Отправляем tcpclient данные
+      m_inetgui_ptr->setOutputMsg (m_output_msg);
+
+      // Настраиваем отображаемый текст
+      m_message_label.setString (m_name_input + ": " + m_current_message);
+      m_message_label.setPosition (
+          20.f, 20.f + m_chat_log[m_selected_index].size () * 25.f);
+
+      // Заносим текст в логи выбранного пользователя
+      m_chat_log[m_selected_index].push_back (m_message_label);
+
+      // Очищаем поле ввода, строку ввода
+      m_current_message.clear ();
+      m_message_display.setString (m_current_message);
+    }
 }
 
+void
+GUI::netHandle ()
+{
+  // Если мы не в чате, то выходим
+  if (!m_is_chat_mode)
+    return;
 
-void GUI::draw(){
+  // Если отсутствуют входящие сообщения или подтверждения аутентификации,
+  // то пропускаем
+  if (!m_inetgui_ptr->flags[FLAG_INPUT_MSG])
+    return;
 
-    if (isRegisterMode) {
-        registerButton.setFillColor(sf::Color(0x2C3987FF));
-        loginButton.setFillColor(sf::Color(0x1B1B1BFF));
-    } else {
-        loginButton.setFillColor(sf::Color(0x2C3987FF));
-        registerButton.setFillColor(sf::Color(0x1B1B1BFF));
+  // Получаем входящее сообщение
+  if (m_inetgui_ptr->getInputMsg (this->m_input_msg_pack))
+    {
+      // Ищем пользователя среди добавленных нами пользователей
+      auto it = std::find (m_users.begin (), m_users.end (),
+                           std::string (m_input_msg_pack.srcname));
+      if (it != m_users.end ())
+        {
+          // Нашли, добавляем сообщение к этому пользователю
+          sf::Text msg (sf::String (m_input_msg_pack.srcname) + ": "
+                            + sf::String (m_input_msg_pack.msg),
+                        m_font, 14);
+          msg.setFillColor (BLACK_COLOR);
+          msg.setPosition (20.f,
+                           20.f
+                               + m_chat_log[m_selected_index].size ()
+                                     * 25.f); // Располагаем сообщения
+                                              // друг под другом
+          m_chat_log[it - m_users.begin ()].push_back (msg);
+          redrawUsers ();
+        }
+      else
+        {
+          // Не нашли, добавляем пользователя + к нему сообщение
+          m_users.push_back (m_input_msg_pack.srcname);
+          sf::Text msg (sf::String (m_input_msg_pack.srcname) + ": "
+                            + sf::String (m_input_msg_pack.msg),
+                        m_font, 14);
+          msg.setFillColor (BLACK_COLOR);
+          msg.setPosition (20.f,
+                           20.f); // Располагаем сообщения друг под другом
+          m_chat_log.push_back ({ msg });
+          redrawUsers ();
+        }
     }
-    newDialogText.setFillColor(sf::Color(isAddingUsername ? 0x40A179FF: 0x2C3987FF));
-    for (size_t i = 0; i < userTexts.size(); ++i) {
-        if (i == selectedUserIndex) {
-            userTexts[i].setFillColor(sf::Color(0x2C3987FF)); // Выбранный пользователь
-        } else {
-            userTexts[i].setFillColor(sf::Color(0x1B1B1BFF));
+}
+
+void
+GUI::draw ()
+{
+
+  // Очистка
+  m_window.clear (GRAY_COLOR);
+
+  // Режим аутентификация
+  if (!m_is_chat_mode)
+    {
+
+      // Login
+      if (m_is_register_mode)
+        {
+          m_register_button.setFillColor (BLUE_COLOR);
+          m_login_button.setFillColor (BLACK_COLOR);
+        }
+
+      // Register
+      else
+        {
+          m_login_button.setFillColor (BLUE_COLOR);
+          m_register_button.setFillColor (BLACK_COLOR);
+        }
+
+      // Рисуем gui элементы окна авторизации
+      m_window.draw (m_login_button);
+      m_window.draw (m_register_button);
+      m_window.draw (m_name_field);
+      m_window.draw (m_password_field);
+      m_window.draw (m_name_label);
+      m_window.draw (m_password_label);
+      m_window.draw (m_name_display);
+      m_window.draw (m_password_display);
+      m_window.draw (m_ok_button);
+
+      // Если есть ошибка рисуем еще сообщение об ошибке
+      if (m_is_error_occured)
+        {
+          m_window.draw (m_error_label);
         }
     }
 
-    window.clear(sf::Color(0xEDF0F6FF));
+  // Режим чата
+  else
+    {
 
-    if (!isChatMode) {
-        window.draw(loginButton);
-        window.draw(registerButton);
-        window.draw(nameField);
-        window.draw(passwordField);
-        window.draw(nameText);
-        window.draw(passwordText);
-        window.draw(nameDisplay);
-        window.draw(passwordDisplay);
-        window.draw(okButton);
-    } else {
-        // Отображаем лог сообщений
-        for (const auto& text : userTexts) {
-            window.draw(text);
+      // Выбираем цвет для кнопки добавления нового пользователя
+      m_new_dialog_sign.setFillColor (m_is_adding_username ? GREEN_COLOR
+                                                           : BLUE_COLOR);
+      // Рисуем ListModel
+      for (const auto &text : m_user_name_text)
+        {
+          m_window.draw (text);
         }
-        for (const auto& line : chatLog.log[selectedUserIndex % users.size()]) {
-            window.draw(line);
+
+      // Отображаем лог сообщений выбранного пользователя
+      for (const auto &line : m_chat_log[m_selected_index % m_users.size ()])
+        {
+          m_window.draw (line);
         }
-        window.draw(messageInputField);
-        window.draw(messageDisplay);
-        window.draw(newDialogText);
+
+      // Перекрашиваем ListModel
+      for (size_t i = 0; i < m_user_name_text.size (); ++i)
+        {
+
+          // Выбранный пользователь
+          if (i == m_selected_index)
+            {
+              m_user_name_text[i].setFillColor (BLUE_COLOR);
+            }
+
+          // Невыбранный пользователь
+          else
+            {
+              m_user_name_text[i].setFillColor (BLACK_COLOR);
+            }
+        }
+
+      // Рисуем все GUI элементы окна чата
+      m_window.draw (m_message_input_field);
+      m_window.draw (m_message_display);
+      m_window.draw (m_new_dialog_sign);
     }
 
-    window.display();
+  // Показываем
+  m_window.display ();
 }
 
 void GUI::redrawUsers(){
-    userTexts.clear();
-    userTexts.reserve(users.size());
-    for (size_t i = 0; i < users.size(); ++i) {
-        userTexts.push_back(sf::Text(users[i], font, 18));
-        userTexts[i].setFont(font);
-        userTexts[i].setString(users[i]);
-        userTexts[i].setPosition(600.f, 20.f + i * 20.f);
+
+  // Очищаем текущий вектор пользователей
+  m_user_name_text.clear ();
+
+  // Запасаемся памятью на всех
+  m_user_name_text.reserve (m_users.size ());
+
+  // Перерисовываем положение каждого пользователя
+  for (size_t i = 0; i < m_users.size (); ++i)
+    {
+      m_user_name_text.push_back (sf::Text (m_users[i], m_font, 18));
+      m_user_name_text[i].setFont (m_font);
+      m_user_name_text[i].setString (m_users[i]);
+      m_user_name_text[i].setPosition (600.f, 20.f + i * 20.f);
     }
 }
